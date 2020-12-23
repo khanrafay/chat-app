@@ -165,6 +165,14 @@ function StartChat(friendKey, friendName, friendPhoto) {
   });
 }
 
+function deleteMessages() {
+  console.log("chat key", chatKey);
+  if (chatKey !== "") {
+    let userRef = firebase.database().ref("chatMessages/" + chatKey);
+    userRef.remove();
+  }
+}
+
 //////////////////////////////////////
 
 function LoadChatMessages(chatKey, friendPhoto) {
@@ -329,7 +337,7 @@ function SendImage(event) {
 /////////////
 
 function LoadChatList() {
-    console.log('current user', currentUserKey)
+  console.log("current user", currentUserKey);
   var db = firebase.database().ref("friend_list");
   db.on("value", function (lists) {
     document.getElementById(
@@ -340,7 +348,7 @@ function LoadChatList() {
     lists.forEach(function (data) {
       var lst = data.val();
       var friendKey = "";
-      console.log('ls',lst, currentUserKey)
+      console.log("ls", lst, currentUserKey);
       if (lst.friendId === currentUserKey) {
         friendKey = lst.userId;
       } else if (lst.userId === currentUserKey) {
@@ -348,14 +356,14 @@ function LoadChatList() {
       }
 
       if (friendKey !== "") {
-          console.log('friend', friendKey)
+        console.log("friend", friendKey);
         firebase
           .database()
           .ref("users")
           .child(friendKey)
           .on("value", function (data) {
             var user = data.val();
-            console.log('yser', user)
+            console.log("yser", user);
             document.getElementById(
               "lstChat"
             ).innerHTML += `<li class="list-group-item list-group-item-action" onclick="StartChat('${data.key}', '${user.name}', '${user.photoURL}')">
@@ -622,11 +630,20 @@ function PopulateFriendList() {
 function signIn() {
   var provider = new firebase.auth.GoogleAuthProvider();
   firebase.auth().signInWithPopup(provider);
- 
+  document
+    .getElementById("divStartLogin")
+    .setAttribute("style", "display:block");
+  document.getElementById("divStart").setAttribute("style", "display:none");
 }
 
 function signOut() {
   firebase.auth().signOut();
+  // document.getElementById("lstChat").setAttribute("style", "display:none");
+  document
+    .getElementById("divStartLogin")
+    .setAttribute("style", "display:none");
+  document.getElementById("divStart").setAttribute("style", "display:block");
+  window.location.reload();
 }
 
 function onFirebaseStateChanged() {
@@ -636,7 +653,7 @@ function onFirebaseStateChanged() {
 function onStateChanged(user) {
   if (user) {
     //alert(firebase.auth().currentUser.email + '\n' + firebase.auth().currentUser.displayName);
-   
+
     var userProfile = { email: "", name: "", photoURL: "" };
     userProfile.email = firebase.auth().currentUser.email;
     userProfile.name = firebase.auth().currentUser.displayName;
